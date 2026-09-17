@@ -21,8 +21,8 @@ Measured from the top of the skull, in H.
 | Landmark | Position | Landmark | Position |
 |---|---|---|---|
 | Chin | 1.00 H | Hip / crotch | 3.10 H |
-| Shoulder line | 1.35 H | Wrist (arm at rest) | 3.30 H |
-| Chest | 1.80 H | Fingertips | 3.75 H |
+| Shoulder line | 1.35 H | Wrist (arm at rest) | 3.15 H |
+| Chest | 1.80 H | Fingertips | 3.95 H |
 | Elbow / waist | 2.50 H | Knee | 4.70 H |
 | | | Ankle | 6.25 H |
 | | | Sole (ground line) | 6.50 H |
@@ -32,7 +32,7 @@ Measured from the top of the skull, in H.
 | Head | 0.78 H | | Waist | 1.05 H |
 | Shoulders | 1.85 H [51 px] | | Hips | 1.25 H |
 
-Hand length **0.85 H** [23 px]. Hands are drawn one step larger than strict anatomy — they carry gesture at small sizes and are the second-most-read element after the head silhouette.
+Hand length **0.80 H** [22 px], measured wrist crease to fingertip. Hands are drawn one step larger than strict anatomy — they carry gesture at small sizes and are the second-most-read element after the head silhouette.
 
 Foot length **0.95 H**. Feet stay visibly separated in every standing pose; merged feet destroy the standing silhouette below 150 px.
 
