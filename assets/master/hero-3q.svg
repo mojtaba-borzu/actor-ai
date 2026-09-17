@@ -27,54 +27,54 @@
   </g>
 
   <g id="leg_far">
-    <path class="k1 ct" d="M394 420h44l-4 70-6 92-1 66h-34l3-66 3-92z"/>
+    <path class="k1 ct" d="M394 416 L438 416 L433 554 L429 680 L399 680 L401 554 Z"/>
     <path class="k1 ct" d="M396 640h34l2 40c1 8-4 13-13 13h-44c-8 0-10-7-4-11z"/>
     <path class="k4" d="M373 678h59v8h-59z"/>
   </g>
 
   <g id="leg_near">
-    <path class="k2 ct" d="M336 420h50l-4 72-6 94-1 68h-38l3-68 3-94z"/>
-    <path class="k3" d="M340 426h42l-3 50h-42z"/>
-    <path class="in" d="M337 494h44"/>
+    <path class="k2 ct" d="M336 416 L386 416 L381 554 L377 684 L339 684 L341 554 Z"/>
+    <path class="k3" d="M338 420h48l-2 48h-46z"/>
+    <path class="in" d="M337 488h46"/>
     <path class="k1 ct" d="M338 648h38l2 40c1 9-5 14-14 14h-52c-9 0-11-7-4-12z"/>
     <path class="k4" d="M310 692h68v8h-68z"/>
   </g>
 
   <g id="torso">
     <!-- jacket: sloped shoulders, nipped waist, slight flare at the hem -->
-    <path class="k2 ct" d="M318 308c6-10 26-18 44-17l22 5 22-5c18-1 38 7 44 17l-10 26-8 54 4 52c-32 5-68 5-100 0l4-52-8-54z"/>
-    <path class="k3" d="M322 310c6-8 24-14 40-13l22 5 22-5c16-1 34 5 40 13l-7 18-18-8-37 6-37-6-18 8z"/>
-    <path class="in" d="M366 312l-5 62 3 66"/>
-    <path class="in" d="M336 348h96M338 398h92"/>
-    <path class="k1" d="M334 424c32 5 68 5 100 0l1 12c-33 5-69 5-102 0z"/>
+    <path class="k2 ct" d="M318 302c6-11 26-19 45-18l21 5 21-5c19-1 39 7 45 18l-10 26-7 54 3 42c-33 5-70 5-104 0l3-42-7-54z"/>
+    <path class="k3" d="M322 304c6-9 24-15 41-14l21 5 21-5c17-1 35 6 41 14l-7 18-18-8-37 6-37-6-18 8z"/>
+    <path class="in" d="M366 306l-5 60 3 58"/>
+    <path class="in" d="M336 344h96M338 392h92"/>
+    <path class="k1" d="M334 412c33 5 70 5 104 0l1 12c-34 5-72 5-106 0z"/>
     <g id="emblem" fill="none" stroke="#3E4B5C" stroke-width="3" stroke-linecap="round">
-      <path d="M356 340h-12a4 4 0 0 0-4 4v14a4 4 0 0 0 4 4h14a4 4 0 0 0 4-4v-12"/>
-      <path d="M336 366l30-30"/>
+      <path d="M356 334h-12a4 4 0 0 0-4 4v14a4 4 0 0 0 4 4h14a4 4 0 0 0 4-4v-12"/>
+      <path d="M336 360l30-30"/>
     </g>
-    <rect x="363" y="333" width="7" height="7" class="k4"/>
+    <rect x="363" y="327" width="7" height="7" class="k4"/>
     <!-- collar + chest V (K5/K6): the head/torso value break -->
-    <path class="k5 ct" d="M358 288h52l7 20-33 6-33-6z"/>
-    <path class="k6" d="M365 291h38l4 11-23 5-23-5z"/>
-    <path class="k5" d="M369 304l15 34 15-34 9 5-24 45-24-45z"/>
+    <path class="k5 ct" d="M358 282h52l7 20-33 6-33-6z"/>
+    <path class="k6" d="M365 285h38l4 11-23 5-23-5z"/>
+    <path class="k5" d="M369 298l15 34 15-34 9 5-24 45-24-45z"/>
   </g>
 
   <g id="arm_far">
-    <path class="k2 ct" d="M436 306c11 3 18 10 18 20l-6 60-4 50h-26l5-50 5-60z"/>
-    <path class="k4" d="M420 428h24v8h-24z"/>
-    <path class="sk ct" d="M422 438h22c5 0 7 4 6 9l-4 40c-1 8-5 12-12 12s-11-5-11-13l-3-39c0-5 0-9 2-9z"/>
-    <path class="sl" d="M443 448c4 2 5 6 4 11"/>
+    <path class="k2 ct" d="M436 300c11 3 18 10 18 20l-6 58-4 46h-26l5-46 5-58z"/>
+    <path class="k4" d="M420 416h24v8h-24z"/>
+    <path class="sk ct" d="M422 424h22c5 0 7 4 6 9l-4 40c-1 8-5 12-12 12s-11-5-11-13l-3-39c0-5 0-9 2-9z"/>
+    <path class="sl" d="M443 434c4 2 5 6 4 11"/>
   </g>
 
   <g id="arm_near">
-    <path class="k2 ct" d="M332 306c-12 3-19 10-19 20l7 60 5 50h27l-6-50-5-60z"/>
-    <path class="k3" d="M334 310c-8 3-13 7-13 14l5 28 18-3-5-28z"/>
-    <path class="k4" d="M324 428h26v8h-26z"/>
-    <path class="sk ct" d="M326 438h24c-4 0-6 4-5 9l4 41c1 8 5 13 13 13s12-5 11-13l-4-41c0-5-3-9-7-9z"/>
-    <path class="sl" d="M345 450c6 1 9 5 9 11"/>
+    <path class="k2 ct" d="M332 300c-12 3-19 10-19 20l7 58 5 46h27l-6-46-5-58z"/>
+    <path class="k3" d="M334 304c-8 3-13 7-13 14l5 28 18-3-5-28z"/>
+    <path class="k4" d="M324 416h26v8h-26z"/>
+    <path class="sk ct" d="M326 424h24c-4 0-6 4-5 9l4 41c1 8 5 13 13 13s12-5 11-13l-4-41c0-5-3-9-7-9z"/>
+    <path class="sl" d="M345 436c6 1 9 5 9 11"/>
   </g>
 
   <g id="neck">
-    <path class="sk ct" d="M370 248h28v48h-28z"/>
+    <path class="sk ct" d="M370 248h28v46h-28z"/>
     <path class="skd" d="M370 248h28v20c-9 7-19 7-28 0z"/>
   </g>
 

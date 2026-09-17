@@ -20,12 +20,14 @@ Measured from the top of the skull, in H.
 
 | Landmark | Position | Landmark | Position |
 |---|---|---|---|
-| Chin | 1.00 H | Hip / crotch | 3.10 H |
-| Shoulder line | 1.35 H | Wrist (arm at rest) | 3.15 H |
-| Chest | 1.80 H | Fingertips | 3.95 H |
-| Elbow / waist | 2.50 H | Knee | 4.70 H |
+| Chin | 1.00 H | Hip / crotch | **3.00 H** |
+| Shoulder line | 1.30 H | Wrist (arm at rest) | **3.00 H** |
+| Chest | **2.00 H** | Fingertips | 3.80 H |
+| Waist / elbow | 2.55 H | Knee | 4.65 H |
 | | | Ankle | 6.25 H |
 | | | Sole (ground line) | 6.50 H |
+
+The figure snaps to whole head units: **head 0–1 H · ribcage 1–2 H · midsection 2–3 H · legs 3–6.5 H**. The midsection is exactly one head tall, which is what puts the wrist at rest exactly on the hip line at 3.00 H — the hand then lands on a landmark instead of floating between two, in every pose and in the rig.
 
 | Width | Value | | Width | Value |
 |---|---|---|---|---|
