@@ -1,0 +1,82 @@
+# Actor 🐣
+
+A tiny animated emoji companion for **macOS**, floating beside Codex and Claude.
+Uses native Apple emoji, AppKit animation, and local activity signals. No server,
+API key, screenshot access, or network connection required.
+
+## Run
+
+```sh
+python3 scripts/install.py
+```
+
+Requires macOS 13+ and Xcode Command Line Tools (`swiftc` and `/usr/bin/python3`).
+Builds `~/Applications/Actor.app`, starts it, registers launch at login, and merges
+Actor's hooks into `~/.claude/settings.json`, backing up existing settings first.
+Start a new Claude Code session after installing.
+
+The background app shows its buddy when Codex / ChatGPT / Claude is open, or when
+recent local coding events arrive. It hides when neither condition applies.
+Open Actor once manually if you quit it before opening a coding app.
+
+- **Drag** to choose a position; “Follow app position” restores automatic placement.
+- **Click** for a heart. **Right-click** or use the menu bar emoji for settings.
+- **Cat mood** changes the emoji palette.
+- **Try a mood / Play all moods** previews animations, visibly labeled **Demo**.
+- **Return to live** ends preview. Single previews expire after ten seconds.
+- **Gentle motion** stops animation; macOS Reduce Motion is also respected.
+
+| Mood | Meaning |
+|---|---|
+| 👋 | Arrival / goodbye |
+| 🐣 | Ready |
+| 🤔 | Thinking / reading |
+| 🧑‍💻 | Editing / writing |
+| 🛠️ | Calling a tool |
+| 🥺 | Waiting for input or permission |
+| 😵‍💫 | Reported failure |
+| 🥳 | Turn completed |
+| 😴 | Resting after inactivity |
+
+## What is live
+
+**Codex:** reads local JSONL lifecycle/tool events from `$CODEX_HOME/sessions`
+(default `~/.codex/sessions`). It tails recent files incrementally and never saves
+conversation content. This works with the installed desktop build without changing
+Codex config or requiring hook trust. The format is internal and may change.
+Only observable states are shown: permission requests and tool-result failures
+are **not reliably available** in these rollouts, so those Codex moods are currently
+preview-only unless explicit error events arrive. Thinking is inferred between tools.
+
+**Claude Code:** command hooks report session start, prompts, tool calls, permission
+requests, failures and completion. Ordinary Claude chat and remote/cloud sessions
+do not emit these local hooks: opening their app only shows **Ready**, not invented
+activity. Claude Code must load the installed settings in a new trusted session.
+
+Auto mode follows the foreground supported app. For multiple Codex sessions, the
+most recently observed prompt owns the state; activity in background sessions does
+not continually steal focus. The initial focus search is bounded to 8 MB per recent
+file, falling back to session creation time for older prompts. Exact selected-task
+tracking inside the desktop UI is not exposed. Ten minutes without an activity
+signal becomes “No recent signal”, never a false success. Status under the emoji
+reads **Live**, **Ready** or **Demo**; the menu shows the event source.
+
+State files contain only provider, mood, and timestamps under
+`~/Library/Application Support/Actor`. Nothing is sent over the network.
+
+## Develop / remove
+
+```sh
+./scripts/build.sh
+python3 -m unittest discover -s tests -v
+python3 scripts/install.py --uninstall
+```
+
+Uninstall removes only Actor's app, launch agent and hook commands. It preserves
+unrelated settings and hooks, and leaves small status files and settings backups.
+
+The earlier SVG swordsman exploration is preserved under `assets/` and `docs/`.
+The current emoji direction supersedes those art constraints for this runtime.
+
+Integration references: [Claude Code hooks](https://code.claude.com/docs/en/hooks),
+[Codex hooks and trust model](https://developers.openai.com/codex/hooks).
