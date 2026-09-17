@@ -32,7 +32,7 @@ final class CompanionView: NSView {
     var entered = CACurrentMediaTime()
     var reduced = false
     var petUntil = 0.0
-    var appearance = "emoji"
+    var appearanceID = "emoji"
     var skins: [CharacterSkin] = []
     var spriteImages: [String: NSImage] = [:]
 
@@ -50,8 +50,8 @@ final class CompanionView: NSView {
     }
 
     var appearanceName: String {
-        if appearance == "cat" { return "Cat" }
-        return skins.first(where: { $0.id == appearance })?.name ?? "Emoji"
+        if appearanceID == "cat" { return "Cat" }
+        return skins.first(where: { $0.id == appearanceID })?.name ?? "Emoji"
     }
     var dragged = false
     var origin = NSPoint.zero
@@ -102,7 +102,7 @@ final class CompanionView: NSView {
         transform.scale(by: CGFloat(appear))
         transform.concat()
         let cats = ["appear": "😺", "idle": "🐱", "thinking": "🧐", "working": "😼", "tool": "🐾", "waiting": "🥺", "error": "🙀", "success": "😻", "sleep": "😴", "goodbye": "😽"]
-        if let skin = skins.first(where: { $0.id == appearance }), let image = spriteImages[skin.id] {
+        if let skin = skins.first(where: { $0.id == appearanceID }), let image = spriteImages[skin.id] {
             let cell = skin.states[state] ?? skin.states["idle"] ?? 0
             let width = image.size.width / CGFloat(skin.columns)
             let height = image.size.height / CGFloat(skin.rows)
@@ -116,7 +116,7 @@ final class CompanionView: NSView {
             NSGraphicsContext.current?.imageInterpolation = .high
             image.draw(in: destination, from: source, operation: .sourceOver, fraction: 1)
         } else {
-            label(appearance == "cat" ? (cats[state] ?? pose.0) : pose.0, NSRect(x: -55, y: -48, width: 110, height: 105), size: 80, color: .white)
+            label(appearanceID == "cat" ? (cats[state] ?? pose.0) : pose.0, NSRect(x: -55, y: -48, width: 110, height: 105), size: 80, color: .white)
         }
         NSGraphicsContext.restoreGraphicsState()
         let sparkle = now < petUntil ? "💖" : pose.2
@@ -175,7 +175,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         view.loadSkins()
         let savedAppearance = UserDefaults.standard.string(forKey: "appearance") ?? "emoji"
         let available = ["emoji", "cat"] + view.skins.map { $0.id }
-        view.appearance = available.contains(savedAppearance) ? savedAppearance : "emoji"
+        view.appearanceID = available.contains(savedAppearance) ? savedAppearance : "emoji"
         panel = NSPanel(contentRect: view.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         panel.isOpaque = false
         panel.backgroundColor = .clear
@@ -229,7 +229,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         for (id, name) in choices {
             let entry = NSMenuItem(title: name, action: #selector(selectAppearance(_:)), keyEquivalent: "")
             entry.target = self; entry.representedObject = id
-            entry.state = view.appearance == id ? .on : .off
+            entry.state = view.appearanceID == id ? .on : .off
             appearances.addItem(entry)
         }
         appearanceItem.submenu = appearances; menu.addItem(appearanceItem)
@@ -257,7 +257,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func selectAppearance(_ sender: NSMenuItem) {
         guard let id = sender.representedObject as? String,
               (["emoji", "cat"] + view.skins.map { $0.id }).contains(id) else { return }
-        view.appearance = id
+        view.appearanceID = id
         UserDefaults.standard.set(id, forKey: "appearance")
         view.entered = CACurrentMediaTime()
         view.needsDisplay = true
