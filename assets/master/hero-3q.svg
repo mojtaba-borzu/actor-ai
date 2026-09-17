@@ -19,6 +19,10 @@
   </filter>
 </defs>
 
+<!-- FX slot order is canon: ground, back, [character], sword, blade, front, rim -->
+<g id="fx_ground"></g>
+<g id="fx_back"></g>
+
 <g id="character" filter="url(#halo)">
 
   <!-- medium-short back mass: ends at the jaw, never below -->
@@ -115,4 +119,9 @@
   </g>
 
 </g>
+
+<g id="sword_slot"></g>
+<g id="fx_blade"></g>
+<g id="fx_front"></g>
+<g id="fx_rim"></g>
 </svg>
