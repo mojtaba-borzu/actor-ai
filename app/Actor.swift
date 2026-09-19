@@ -26,6 +26,14 @@ struct CharacterSkin: Decodable {
 }
 
 final class CompanionView: NSView {
+    static let base = NSSize(width: 190, height: 220)
+    static let sizes = ["small", "medium", "large"]
+    static func factor(_ id: String) -> CGFloat { id == "small" ? 0.62 : (id == "medium" ? 0.8 : 1) }
+    static func frameSize(_ id: String) -> NSSize {
+        let f = factor(id)
+        return NSSize(width: (base.width * f).rounded(), height: (base.height * f).rounded())
+    }
+    var scale: CGFloat = 1
     var state = "appear"
     var provider = "Actor"
     var source = "Waiting for agent"
@@ -83,6 +91,8 @@ final class CompanionView: NSView {
         let jump = state == "success" && !still ? abs(sin(phase * 5)) * 16 : floating
         let tilt: Double = still ? 0 : (state == "error" ? sin(phase * 19) * max(0, 1-t) * 9 : sin(phase * 2) * (state == "thinking" ? 7 : 3))
         let appear = still ? 1 : min(1, max(0.15, t / 0.35))
+        NSGraphicsContext.saveGraphicsState()
+        if scale != 1 { let zoom = NSAffineTransform(); zoom.scale(by: scale); zoom.concat() }
         let shadow = NSBezierPath(ovalIn: NSRect(x: 60 + jump/3, y: 65, width: 70-jump*0.6, height: 9))
         NSColor.black.withAlphaComponent(0.12).setFill(); shadow.fill()
 
@@ -136,6 +146,7 @@ final class CompanionView: NSView {
                 NSBezierPath(ovalIn: NSRect(x: 94 + cos(angle)*distance, y: 120 + sin(angle)*distance, width: 4, height: 4)).fill()
             }
         }
+        NSGraphicsContext.restoreGraphicsState()
     }
     override func mouseDown(with event: NSEvent) {
         origin = window?.frame.origin ?? .zero
@@ -162,6 +173,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var painter: Timer?
     var bridge: Process?
     var preferred = "Auto"
+    var sizeID = "large"
     var demoUntil = 0.0
     var pinned = false
     var hidden = false
@@ -176,6 +188,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let savedAppearance = UserDefaults.standard.string(forKey: "appearance") ?? "emoji"
         let available = ["emoji", "cat"] + view.skins.map { $0.id }
         view.appearanceID = available.contains(savedAppearance) ? savedAppearance : "emoji"
+        let savedSize = UserDefaults.standard.string(forKey: "size") ?? "large"
+        sizeID = CompanionView.sizes.contains(savedSize) ? savedSize : "large"
+        view.scale = CompanionView.factor(sizeID)
+        view.frame = NSRect(origin: .zero, size: CompanionView.frameSize(sizeID))
         panel = NSPanel(contentRect: view.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         panel.isOpaque = false
         panel.backgroundColor = .clear
@@ -233,6 +249,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             appearances.addItem(entry)
         }
         appearanceItem.submenu = appearances; menu.addItem(appearanceItem)
+        let sizeItem = NSMenuItem(title: "Size · " + sizeName, action: nil, keyEquivalent: "")
+        let sizeMenu = NSMenu()
+        for id in CompanionView.sizes {
+            let entry = NSMenuItem(title: id.capitalized, action: #selector(selectSize(_:)), keyEquivalent: "")
+            entry.target = self; entry.representedObject = id
+            entry.state = sizeID == id ? .on : .off
+            sizeMenu.addItem(entry)
+        }
+        sizeItem.submenu = sizeMenu; menu.addItem(sizeItem)
         add("Gentle motion", #selector(toggleMotion), checked: view.reduced)
         add("Follow app position", #selector(resetPosition), checked: !pinned)
         add(hidden ? "Show buddy" : "Hide buddy", #selector(toggleHidden))
@@ -251,6 +276,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(connection)
         add("Quit Actor", #selector(quit))
         return menu
+    }
+    var sizeName: String { sizeID == "small" ? "Small" : (sizeID == "medium" ? "Medium" : "Large") }
+    func applySize(_ id: String) {
+        sizeID = id
+        view.scale = CompanionView.factor(id)
+        let size = CompanionView.frameSize(id)
+        view.frame = NSRect(origin: .zero, size: size)
+        var frame = panel.frame
+        frame.size = size
+        panel.setFrame(frame, display: true)
+        view.needsDisplay = true
+    }
+    @objc func selectSize(_ sender: NSMenuItem) {
+        guard let id = sender.representedObject as? String, CompanionView.sizes.contains(id) else { return }
+        UserDefaults.standard.set(id, forKey: "size")
+        applySize(id)
+        update()
     }
     func refreshMenu() { item.menu = makeMenu() }
     @objc func selectProvider(_ sender: NSMenuItem) { preferred = sender.representedObject as? String ?? "Auto"; returnLive() }
@@ -327,8 +369,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     func place(near app: NSRunningApplication?) {
         let screen = NSScreen.main ?? NSScreen.screens[0]
+        let size = panel.frame.size
         var visible = screen.visibleFrame
-        var point = NSPoint(x: visible.maxX - 205, y: visible.minY + 35)
+        var point = NSPoint(x: visible.maxX - size.width - 15, y: visible.minY + 35)
         if let app = app,
            let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]],
            let window = windows.first(where: { ($0[kCGWindowOwnerPID as String] as? Int32) == app.processIdentifier && ($0[kCGWindowLayer as String] as? Int) == 0 && (($0[kCGWindowBounds as String] as? [String: CGFloat])?["Width"] ?? 0) > 300 }),
@@ -337,10 +380,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let rect = NSRect(x: bounds["X"] ?? 0, y: desktopHeight - (bounds["Y"] ?? 0) - (bounds["Height"] ?? 0), width: bounds["Width"] ?? 0, height: bounds["Height"] ?? 0)
             visible = NSScreen.screens.first(where: { $0.frame.intersects(rect) })?.visibleFrame ?? visible
             let outside = rect.maxX - 10
-            point = NSPoint(x: outside + 190 <= visible.maxX ? outside : rect.maxX - 190, y: rect.minY + 25)
+            point = NSPoint(x: outside + size.width <= visible.maxX ? outside : rect.maxX - size.width, y: rect.minY + 25)
         }
-        point.x = min(max(point.x, visible.minX), visible.maxX - 190)
-        point.y = min(max(point.y, visible.minY), visible.maxY - 220)
+        point.x = min(max(point.x, visible.minX), visible.maxX - size.width)
+        point.y = min(max(point.y, visible.minY), visible.maxY - size.height)
         panel.setFrameOrigin(point)
     }
 }
