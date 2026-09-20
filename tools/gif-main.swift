@@ -7,19 +7,26 @@ _ = NSApplication.shared
 
 let fps = 15.0
 let zoom: CGFloat = 1.6
-let provider = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "Claude"
-let output = URL(fileURLWithPath: CommandLine.arguments.count > 2 ? CommandLine.arguments[2] : "actor.gif")
+func argument(_ index: Int, _ fallback: String) -> String {
+    CommandLine.arguments.count > index ? CommandLine.arguments[index] : fallback
+}
+let provider = argument(1, "Claude")
+let output = URL(fileURLWithPath: argument(2, "actor.gif"))
+let appearance = argument(3, "emoji")
+let preset = argument(4, "demo")
 
-// state, seconds
-let timeline: [(String, Double)] = [
-    ("thinking", 2.0), ("working", 2.0), ("tool", 1.6), ("success", 2.2), ("idle", 1.6)
-]
+// state, seconds. "all" walks every mood in the app's own order, so it cannot
+// fall out of step with orderedStates.
+let timeline: [(String, Double)] = preset == "all"
+    ? orderedStates.map { ($0, 1.3) }
+    : [("thinking", 2.0), ("working", 2.0), ("tool", 1.6), ("success", 2.2), ("idle", 1.6)]
 
 let size = NSSize(width: (CompanionView.base.width * zoom).rounded(),
                   height: (CompanionView.base.height * zoom).rounded())
 let view = CompanionView(frame: NSRect(origin: .zero, size: size))
 view.scale = zoom
 view.provider = provider
+view.appearanceID = appearance
 view.source = "Live hooks"
 
 guard let destination = CGImageDestinationCreateWithURL(

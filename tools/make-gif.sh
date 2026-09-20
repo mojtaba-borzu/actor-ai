@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Renders a looping GIF of the companion using the app's own drawing code.
-# usage: ./tools/make-gif.sh [provider] [output.gif]
+# usage: ./tools/make-gif.sh [provider] [output.gif] [emoji|cat] [demo|all]
 set -eu
 cd "$(dirname "$0")/.."
 work="$(mktemp -d)"
@@ -13,4 +13,4 @@ sed -e '/^let application = NSApplication.shared$/,$d' \
 cat tools/gif-main.swift >> "$work/main.swift"
 swiftc -target "$(uname -m)-apple-macosx13.0" "$work/main.swift" -o "$work/gifmaker" \
     -framework AppKit -framework QuartzCore -framework ImageIO -O
-"$work/gifmaker" "${1:-Claude}" "$PWD/${2:-actor.gif}"
+"$work/gifmaker" "${1:-Claude}" "$PWD/${2:-actor.gif}" "${3:-emoji}" "${4:-demo}"
