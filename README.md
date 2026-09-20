@@ -4,10 +4,7 @@ A tiny animated emoji companion for **macOS**, floating beside Codex.
 Uses native Apple emoji, AppKit animation, and local activity signals. No server,
 API key, screenshot access, or network connection required.
 
-<!-- Record 3–5 seconds of the buddy changing mood, save it as assets/demo.gif,
-     then delete this comment and keep the line below:
 ![Actor reacting to a live Codex session](assets/demo.gif)
--->
 
 ## Install
 
@@ -48,6 +45,10 @@ Open Actor once manually if you quit it before opening a coding app.
 | 🥳 | Turn completed |
 | 😴 | Resting after inactivity |
 
+Cat mood swaps the palette. Every mood, in order:
+
+![All ten moods in the cat palette](assets/demo-cat.gif)
+
 ## What is live
 
 **Codex:** reads local JSONL lifecycle/tool events from `$CODEX_HOME/sessions`
@@ -74,8 +75,13 @@ State files contain only provider, mood, and timestamps under
 ```sh
 ./scripts/build.sh
 python3 -m unittest discover -s tests -v
+./tools/make-gif.sh Codex assets/demo.gif emoji demo
 python3 scripts/install.py --uninstall
 ```
+
+The demo GIFs are rendered by the app's own `draw()`, so they cannot drift from
+what ships. `make-gif.sh` takes a provider label, an output path, `emoji` or
+`cat`, and `demo` or `all`.
 
 Uninstall removes only Actor's app and launch agent. It leaves small status files.
 
