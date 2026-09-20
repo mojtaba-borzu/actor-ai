@@ -4,15 +4,26 @@ A tiny animated emoji companion for **macOS**, floating beside Codex.
 Uses native Apple emoji, AppKit animation, and local activity signals. No server,
 API key, screenshot access, or network connection required.
 
-## Run
+<!-- Record 3–5 seconds of the buddy changing mood, save it as assets/demo.gif,
+     then delete this comment and keep the line below:
+![Actor reacting to a live Codex session](assets/demo.gif)
+-->
+
+## Install
 
 ```sh
+git clone https://github.com/mojtaba-borzu/actor-ai
+cd actor-ai
 python3 scripts/install.py
 ```
 
 Requires macOS 13+ and Xcode Command Line Tools (`swiftc` and `/usr/bin/python3`).
 Builds `~/Applications/Actor.app`, starts it and registers launch at login. It does
 not change any coding-app configuration.
+
+Actor is compiled on your own machine from the source in this repository, so there
+is no prebuilt binary to trust and no Gatekeeper warning to click past. Everything
+it reads stays local; see [What is live](#what-is-live).
 
 The background app shows its buddy when Codex / ChatGPT is open, or when
 recent local coding events arrive. It hides when neither condition applies.
@@ -72,3 +83,8 @@ The earlier SVG swordsman exploration is preserved under `assets/` and `docs/`.
 The current emoji direction supersedes those art constraints for this runtime.
 
 Integration reference: [Codex hooks and trust model](https://developers.openai.com/codex/hooks).
+
+## License
+
+[MIT](LICENSE). Apple emoji glyphs are rendered by the system font and are not
+redistributed by this repository.
