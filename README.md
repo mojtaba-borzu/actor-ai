@@ -85,8 +85,11 @@ what ships. `make-gif.sh` takes a provider label, an output path, `emoji` or
 
 Uninstall removes only Actor's app and launch agent. It leaves small status files.
 
-The earlier SVG swordsman exploration is preserved under `assets/` and `docs/`.
-The current emoji direction supersedes those art constraints for this runtime.
+`proto/tauri/` is an experimental cross-platform shell: a Rust window that reads the
+same `status.json` and renders the same moods in a webview, so Windows and Linux do
+not need the AppKit view rewritten. Build it with `cargo build` inside that folder.
+`tools/build-renderer.py` generates its UI by parsing the moods out of `app/Actor.swift`,
+so the two cannot drift.
 
 Integration reference: [Codex hooks and trust model](https://developers.openai.com/codex/hooks).
 

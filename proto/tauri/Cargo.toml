@@ -1,0 +1,14 @@
+[package]
+name = "actor-proto"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = "2"
+
+[dependencies]
+serde_json = "1"
+tauri = { version = "2", features = ["macos-private-api"] }
+
+[profile.dev]
+incremental = true

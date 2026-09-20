@@ -1,0 +1,30 @@
+{
+  "productName": "ActorProto",
+  "version": "0.1.0",
+  "identifier": "local.actor.proto",
+  "build": {
+    "frontendDist": "ui"
+  },
+  "app": {
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "label": "buddy",
+        "width": 250,
+        "height": 210,
+        "transparent": true,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "shadow": false,
+        "skipTaskbar": true,
+        "resizable": false,
+        "focus": false,
+        "title": "Actor"
+      }
+    ],
+    "macOSPrivateApi": true,
+    "withGlobalTauri": true
+  }
+}
