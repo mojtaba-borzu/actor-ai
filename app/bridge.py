@@ -1,7 +1,5 @@
-"""Local-only event bridge. Never persists prompts, tool arguments or responses."""
-import argparse
+"""Local-only Codex event bridge. Never persists prompts, tool arguments or responses."""
 import datetime as dt
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -10,12 +8,6 @@ import time
 
 ROOT = Path.home() / 'Library/Application Support/Actor'
 STATES = {'idle', 'appear', 'thinking', 'working', 'tool', 'waiting', 'error', 'success', 'sleep', 'goodbye'}
-EVENTS = {
-    'SessionStart': 'appear', 'UserPromptSubmit': 'thinking',
-    'PostToolUse': 'thinking', 'PostToolUseFailure': 'error',
-    'PermissionRequest': 'waiting', 'Stop': 'success', 'StopFailure': 'error',
-    'SessionEnd': 'goodbye', 'PreCompact': 'thinking', 'PostCompact': 'thinking',
-}
 
 def tool_state(name):
     name = name.lower()
@@ -24,14 +16,6 @@ def tool_state(name):
     if any(x in name for x in ('edit', 'write', 'patch')):
         return 'working'
     return 'tool'
-
-def hook_state(data):
-    event = data.get('hook_event_name')
-    if event == 'PreToolUse':
-        return tool_state(data.get('tool_name', ''))
-    if event == 'Notification':
-        return 'waiting' if data.get('notification_type') in ('permission_prompt', 'elicitation_dialog', 'agent_needs_input') else None
-    return EVENTS.get(event)
 
 def rollout_state(data):
     payload = data.get('payload', {})
@@ -162,18 +146,8 @@ class Monitor:
                     self.sessions[key] = dict(provider='Codex', state=state, at=at, start=start, source='Local events')
             except (OSError, ValueError):
                 continue
-        for path in (self.root / 'events').glob('*.json'):
-            try:
-                record = json.loads(path.read_text())
-                if record.get('state') in STATES and record.get('provider') in ('Claude', 'Codex'):
-                    if now - record.get('at', 0) < 86400:
-                        self.sessions[(record['provider'], path.name)] = record
-                    else:
-                        path.unlink(missing_ok=True)
-            except (OSError, ValueError, TypeError):
-                continue
         output = {}
-        for provider in ('Codex', 'Claude'):
+        for provider in ('Codex',):
             records = [r for r in self.sessions.values() if r['provider'] == provider and now-r['at'] < 86400]
             if not records:
                 continue
@@ -193,43 +167,12 @@ class Monitor:
         atomic_json(self.root / 'status.json', output)
         return output
 
-def emit(provider, data, root=ROOT):
-    state = hook_state(data)
-    if state is None:
-        return
-    # Child agents should not overwrite their parent's visible status.
-    if data.get('agent_id'):
-        return
-    session = str(data.get('session_id', 'default'))
-    key = hashlib.sha256((provider + session).encode()).hexdigest()[:24]
-    path = root / 'events' / (key + '.json')
-    now = time.time()
-    start = now
-    try:
-        start = json.loads(path.read_text()).get('start', now)
-    except (OSError, ValueError):
-        pass
-    if data.get('hook_event_name') in ('SessionStart', 'UserPromptSubmit'):
-        start = now
-    atomic_json(path, dict(provider=provider, state=state, at=now, start=start, source='Live hooks'))
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('mode', choices=('monitor', 'hook'))
-    parser.add_argument('--provider', choices=('Claude', 'Codex'), default='Claude')
-    args = parser.parse_args()
-    if args.mode == 'hook':
-        import sys
+    monitor = Monitor()
+    parent = os.getppid()
+    while os.getppid() == parent:
         try:
-            emit(args.provider, json.load(sys.stdin))
-        except (OSError, ValueError, TypeError):
-            pass  # Visual-only hooks must never block an agent or write to stdout.
-    else:
-        monitor = Monitor()
-        parent = os.getppid()
-        while os.getppid() == parent:
-            try:
-                monitor.poll()
-            except OSError:
-                pass
-            time.sleep(0.6)
+            monitor.poll()
+        except OSError:
+            pass
+        time.sleep(0.6)

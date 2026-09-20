@@ -86,7 +86,7 @@ final class CompanionView: NSView {
         let t = now - entered
         let still = reduced || NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         let phase = still ? 0 : t
-        let palette = provider == "Claude" ? NSColor(calibratedRed: 0.92, green: 0.62, blue: 0.43, alpha: 1) : NSColor(calibratedRed: 0.48, green: 0.80, blue: 0.68, alpha: 1)
+        let palette = NSColor(calibratedRed: 0.48, green: 0.80, blue: 0.68, alpha: 1)
         let floating = still ? 0 : sin(phase * 2.8) * 4
         let jump = state == "success" && !still ? abs(sin(phase * 5)) * 16 : floating
         let tilt: Double = still ? 0 : (state == "error" ? sin(phase * 19) * max(0, 1-t) * 9 : sin(phase * 2) * (state == "thinking" ? 7 : 3))
@@ -213,7 +213,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         item.menu = makeMenu()
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/python3")
-        process.arguments = [Bundle.main.resourceURL!.appendingPathComponent("bridge.py").path, "monitor"]
+        process.arguments = [Bundle.main.resourceURL!.appendingPathComponent("bridge.py").path]
         process.standardOutput = FileHandle.nullDevice
         process.standardError = FileHandle.nullDevice
         do { try process.run(); bridge = process } catch { view.source = "Bridge unavailable" }
@@ -237,7 +237,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         let heading = NSMenuItem(title: "Actor · Your tiny coding buddy", action: nil, keyEquivalent: "")
         menu.addItem(heading); menu.addItem(.separator())
-        for name in ["Auto", "Codex", "Claude"] { add("Follow " + name, #selector(selectProvider(_:)), value: name, checked: preferred == name) }
+        for name in ["Auto", "Codex"] { add("Follow " + name, #selector(selectProvider(_:)), value: name, checked: preferred == name) }
         menu.addItem(.separator())
         let appearanceItem = NSMenuItem(title: "Appearance · " + view.appearanceName, action: nil, keyEquivalent: "")
         let appearances = NSMenu()
@@ -333,20 +333,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func apps() -> [NSRunningApplication] {
         NSWorkspace.shared.runningApplications.filter {
             let name = $0.localizedName ?? ""
-            return ["Codex", "ChatGPT", "Claude"].contains(name) && $0.activationPolicy == .regular
+            return ["Codex", "ChatGPT"].contains(name) && $0.activationPolicy == .regular
         }
     }
     func update() {
         if hidden { panel.orderOut(nil); return }
         if CACurrentMediaTime() < demoUntil { return }
-        let running = apps().filter { preferred == "Auto" || (preferred == "Claude" ? $0.localizedName == "Claude" : $0.localizedName != "Claude") }
+        let running = apps()
         let front = NSWorkspace.shared.frontmostApplication
         let chosen = running.first { app in
-            preferred == "Auto" ? app.processIdentifier == front?.processIdentifier : (preferred == "Claude" ? app.localizedName == "Claude" : app.localizedName != "Claude")
-        } ?? running.first { lastProvider == "Claude" ? $0.localizedName == "Claude" : $0.localizedName != "Claude" } ?? running.first
+            preferred == "Auto" ? app.processIdentifier == front?.processIdentifier : true
+        } ?? running.first
         var status: [String: [String: Any]] = [:]
         if let data = try? Data(contentsOf: support.appendingPathComponent("status.json")), let decoded = try? JSONSerialization.jsonObject(with: data) as? [String: [String: Any]] { status = decoded }
-        let provider = preferred == "Auto" ? (chosen?.localizedName == "Claude" ? "Claude" : "Codex") : preferred
+        let provider = "Codex"
         lastProvider = provider
         let modified = (try? FileManager.default.attributesOfItem(atPath: support.appendingPathComponent("status.json").path)[.modificationDate]) as? Date
         let bridgeAlive = modified.map { Date().timeIntervalSince($0) < 5 } ?? false

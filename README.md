@@ -1,6 +1,6 @@
 # Actor 🐣
 
-A tiny animated emoji companion for **macOS**, floating beside Codex and Claude.
+A tiny animated emoji companion for **macOS**, floating beside Codex.
 Uses native Apple emoji, AppKit animation, and local activity signals. No server,
 API key, screenshot access, or network connection required.
 
@@ -11,11 +11,10 @@ python3 scripts/install.py
 ```
 
 Requires macOS 13+ and Xcode Command Line Tools (`swiftc` and `/usr/bin/python3`).
-Builds `~/Applications/Actor.app`, starts it, registers launch at login, and merges
-Actor's hooks into `~/.claude/settings.json`, backing up existing settings first.
-Start a new Claude Code session after installing.
+Builds `~/Applications/Actor.app`, starts it and registers launch at login. It does
+not change any coding-app configuration.
 
-The background app shows its buddy when Codex / ChatGPT / Claude is open, or when
+The background app shows its buddy when Codex / ChatGPT is open, or when
 recent local coding events arrive. It hides when neither condition applies.
 Open Actor once manually if you quit it before opening a coding app.
 
@@ -48,11 +47,6 @@ Only observable states are shown: permission requests and tool-result failures
 are **not reliably available** in these rollouts, so those Codex moods are currently
 preview-only unless explicit error events arrive. Thinking is inferred between tools.
 
-**Claude Code:** command hooks report session start, prompts, tool calls, permission
-requests, failures and completion. Ordinary Claude chat and remote/cloud sessions
-do not emit these local hooks: opening their app only shows **Ready**, not invented
-activity. Claude Code must load the installed settings in a new trusted session.
-
 Auto mode follows the foreground supported app. For multiple Codex sessions, the
 most recently observed prompt owns the state; activity in background sessions does
 not continually steal focus. The initial focus search is bounded to 8 MB per recent
@@ -72,11 +66,9 @@ python3 -m unittest discover -s tests -v
 python3 scripts/install.py --uninstall
 ```
 
-Uninstall removes only Actor's app, launch agent and hook commands. It preserves
-unrelated settings and hooks, and leaves small status files and settings backups.
+Uninstall removes only Actor's app and launch agent. It leaves small status files.
 
 The earlier SVG swordsman exploration is preserved under `assets/` and `docs/`.
 The current emoji direction supersedes those art constraints for this runtime.
 
-Integration references: [Claude Code hooks](https://code.claude.com/docs/en/hooks),
-[Codex hooks and trust model](https://developers.openai.com/codex/hooks).
+Integration reference: [Codex hooks and trust model](https://developers.openai.com/codex/hooks).

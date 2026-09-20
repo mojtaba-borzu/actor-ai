@@ -32,7 +32,7 @@ The brief's 40 "states" are agent events, not visual states. About 26 of them ar
 
 ## 2. What the tooling actually emits
 
-Verified against the current Claude Code hooks reference — **33 hook events**:
+Reference list of the agent hook events considered — **33 hook events**:
 
 `SessionStart` · `Setup` · `InstructionsLoaded` · `UserPromptSubmit` · `UserPromptExpansion` · `MessageDisplay` · `PreToolUse` · `PermissionRequest` · `PostToolUse` · `PostToolUseFailure` · `PostToolBatch` · `PermissionDenied` · `Notification` · `SubagentStart` · `SubagentStop` · `TaskCreated` · `TaskCompleted` · `Stop` · `StopFailure` · `TeammateIdle` · `ConfigChange` · `CwdChanged` · `DirectoryAdded` · `FileChanged` · `WorktreeCreate` · `WorktreeRemove` · `PreCompact` · `PostCompact` · `PreModelSwitch` · `PostModelSwitch` · `SessionEnd` · `Elicitation` · `ElicitationResult`
 
@@ -74,7 +74,7 @@ Four facts that shape the design:
 | `StopFailure` | ALERT | |
 | `SessionEnd` | `goodbye` → `disappear` | |
 
-**Not observable, and therefore inferred or cut:** model reasoning has no start/stop event — "thinking" is inferred from the gap between `UserPromptSubmit` / `PostToolUse` and the next event. Time of day is local clock. Git, test runners, builds and IDE activity have no Claude Code hook — they are v2 integrations via file watching or their own hooks, and v1 does not pretend to show them.
+**Not observable, and therefore inferred or cut:** model reasoning has no start/stop event — "thinking" is inferred from the gap between `UserPromptSubmit` / `PostToolUse` and the next event. Time of day is local clock. Git, test runners, builds and IDE activity have no agent hook — they are v2 integrations via file watching or their own hooks, and v1 does not pretend to show them.
 
 ## 4. Timing policy
 
@@ -87,7 +87,7 @@ Tool calls routinely complete faster than any animation can be perceived. Withou
 - **Priority**, highest first: `ASK` → `ALERT` → `WIN` → `STRIKE` → `WORK` → `THINK` → `IDLE` → `REST`. A lower-priority event never preempts a higher-priority one that is still in its minimum dwell.
 - **No queue.** Queueing means the character is still playing tool-call animations thirty seconds after the task finished — it would be lying about the present state. Dropped events are dropped.
 
-Do not hard-code assumed tool latencies. If real numbers are needed they are measurable: the OTLP span `claude_code.tool.execution` carries `duration_ms`, and `claude_code.tool.blocked_on_user` separates permission-wait from execution time.
+Do not hard-code assumed tool latencies. If real numbers are needed they are measurable: the agent's OTLP tool-execution span carries `duration_ms`, and a blocked-on-user span separates permission-wait from execution time.
 
 ## 5. Concurrency
 
