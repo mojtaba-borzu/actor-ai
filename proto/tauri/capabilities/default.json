@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The buddy window: drag itself, resize itself, hide itself, receive state.",
+  "windows": ["buddy"],
+  "permissions": [
+    "core:default",
+    "core:event:allow-listen",
+    "core:window:allow-start-dragging",
+    "core:window:allow-hide",
+    "core:window:allow-show",
+    "core:window:allow-set-size"
+  ]
+}
