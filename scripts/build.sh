@@ -3,7 +3,20 @@ set -eu
 cd "$(dirname "$0")/.."
 app="$PWD/.build/Actor.app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
-swiftc -target "$(uname -m)-apple-macosx13.0" app/Actor.swift -o "$app/Contents/MacOS/Actor" -framework AppKit -framework QuartzCore -O
+compile() {
+    swiftc -target "$1-apple-macosx13.0" app/Actor.swift -o "$2" -framework AppKit -framework QuartzCore -O
+}
+
+# A local build only has to run on this Mac. A released one has to run on both
+# architectures, so CI sets ACTOR_UNIVERSAL and the two slices are lipo'd together.
+if [[ -n "${ACTOR_UNIVERSAL:-}" ]]; then
+    compile arm64 "$app/Contents/MacOS/Actor.arm64"
+    compile x86_64 "$app/Contents/MacOS/Actor.x86_64"
+    lipo -create "$app/Contents/MacOS/Actor.arm64" "$app/Contents/MacOS/Actor.x86_64" -output "$app/Contents/MacOS/Actor"
+    rm "$app/Contents/MacOS/Actor.arm64" "$app/Contents/MacOS/Actor.x86_64"
+else
+    compile "$(uname -m)" "$app/Contents/MacOS/Actor"
+fi
 cp app/bridge.py "$app/Contents/Resources/bridge.py"
 if [[ -d app/Skins ]]; then
     mkdir -p "$app/Contents/Resources/Skins"

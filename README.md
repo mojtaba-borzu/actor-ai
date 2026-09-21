@@ -8,6 +8,24 @@ API key, screenshot access, or network connection required.
 
 ## Install
 
+### Download it
+
+Grab `Actor-macOS.zip` from the
+[latest release](https://github.com/mojtaba-borzu/actor-ai/releases/latest), unzip it
+and move `Actor.app` into your Applications folder. One universal build, Apple Silicon
+and Intel, macOS 13+.
+
+The app is ad-hoc signed rather than notarized, and macOS quarantines anything a browser
+downloaded, so it refuses to open until the flag is cleared:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Actor.app
+```
+
+To have it start at login, add it under System Settings -> General -> Login Items.
+
+### Or build it
+
 ```sh
 git clone https://github.com/mojtaba-borzu/actor-ai
 cd actor-ai
@@ -18,9 +36,9 @@ Requires macOS 13+ and Xcode Command Line Tools (`swiftc` and `/usr/bin/python3`
 Builds `~/Applications/Actor.app`, starts it and registers launch at login. It does
 not change any coding-app configuration.
 
-Actor is compiled on your own machine from the source in this repository, so there
-is no prebuilt binary to trust and no Gatekeeper warning to click past. Everything
-it reads stays local; see [What is live](#what-is-live).
+Building locally is the path with the least to trust: nothing is downloaded, so there
+is no quarantine flag to clear and no login item to add by hand. Either way everything
+Actor reads stays local; see [What is live](#what-is-live).
 
 The background app shows its buddy when Codex / ChatGPT is open, or when
 recent local coding events arrive. It hides when neither condition applies.

@@ -1,0 +1,69 @@
+name: Release macOS app
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test the bridge
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Build a universal app
+        run: zsh scripts/build.sh
+        env:
+          ACTOR_UNIVERSAL: '1'
+
+      # A release that runs only on the architecture the runner happened to use is
+      # the failure this job exists to prevent, so fail loudly rather than ship it.
+      - name: Check both architectures are present
+        run: |
+          archs=$(lipo -archs .build/Actor.app/Contents/MacOS/Actor)
+          echo "$archs"
+          for want in arm64 x86_64; do
+            case "$archs" in *"$want"*) ;; *) echo "missing $want"; exit 1 ;; esac
+          done
+
+      # ditto, not zip: it preserves the bundle's symlinks and permission bits.
+      - name: Zip the bundle
+        run: ditto -c -k --keepParent .build/Actor.app Actor-macOS.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Actor-macOS
+          path: Actor-macOS.zip
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<'NOTES'
+          Download `Actor-macOS.zip`, unzip it, and move `Actor.app` into your Applications folder.
+
+          The app is ad-hoc signed rather than notarized, so macOS quarantines anything a
+          browser downloaded and refuses to open it. One command clears that:
+
+              xattr -dr com.apple.quarantine /Applications/Actor.app
+
+          To start it at login, add it under System Settings -> General -> Login Items.
+
+          Building from source instead needs neither step:
+
+              git clone https://github.com/mojtaba-borzu/actor-ai
+              cd actor-ai
+              python3 scripts/install.py
+
+          Requires macOS 13 or newer. Universal: Apple Silicon and Intel.
+          NOTES
+          gh release create "$GITHUB_REF_NAME" Actor-macOS.zip \
+            --title "Actor $GITHUB_REF_NAME" \
+            --notes-file notes.md
