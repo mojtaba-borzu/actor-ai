@@ -4,16 +4,19 @@ A tiny animated emoji companion for **macOS**, floating beside Codex.
 Uses native Apple emoji, AppKit animation, and local activity signals. No server,
 API key, screenshot access, or network connection required.
 
+**[Download for macOS](https://github.com/mojtaba-borzu/actor-ai/releases/latest/download/Actor-macOS.zip)** · universal, macOS 13+ · one command to run after unzipping, see [Install](#install).
+
 ![Actor reacting to a live Codex session](assets/demo.gif)
 
 ## Install
 
 ### Download it
 
-Grab `Actor-macOS.zip` from the
-[latest release](https://github.com/mojtaba-borzu/actor-ai/releases/latest), unzip it
-and move `Actor.app` into your Applications folder. One universal build, Apple Silicon
-and Intel, macOS 13+.
+[`Actor-macOS.zip`](https://github.com/mojtaba-borzu/actor-ai/releases/latest/download/Actor-macOS.zip)
+always points at the newest build; every version is listed on the
+[releases page](https://github.com/mojtaba-borzu/actor-ai/releases). Unzip it and move
+`Actor.app` into your Applications folder. One universal build, Apple Silicon and Intel,
+macOS 13+.
 
 The app is ad-hoc signed rather than notarized, and macOS quarantines anything a browser
 downloaded, so it refuses to open until the flag is cleared:
