@@ -43,10 +43,36 @@ impl Default for Prefs {
 
 struct Shared(Mutex<Prefs>);
 
+/// One directory per platform, shared with the bridge. Keep in sync with
+/// data_root() in app/bridge.py: if these two disagree the window opens and
+/// never receives a state.
+fn data_dir() -> Option<PathBuf> {
+    // HOME is not set for every Windows session; USERPROFILE always is.
+    let home = || {
+        std::env::var("HOME")
+            .or_else(|_| std::env::var("USERPROFILE"))
+            .ok()
+            .map(PathBuf::from)
+    };
+    if cfg!(target_os = "macos") {
+        Some(home()?.join("Library/Application Support/Actor"))
+    } else if cfg!(target_os = "windows") {
+        let base = std::env::var("APPDATA")
+            .ok()
+            .map(PathBuf::from)
+            .or_else(|| Some(home()?.join("AppData/Roaming")))?;
+        Some(base.join("Actor"))
+    } else {
+        let base = std::env::var("XDG_DATA_HOME")
+            .ok()
+            .map(PathBuf::from)
+            .or_else(|| Some(home()?.join(".local/share")))?;
+        Some(base.join("Actor"))
+    }
+}
+
 fn status_path() -> Option<PathBuf> {
-    let home = PathBuf::from(std::env::var("HOME").ok()?);
-    // Same file bridge.py writes. Windows would read %APPDATA% instead.
-    Some(home.join("Library/Application Support/Actor/status.json"))
+    Some(data_dir()?.join("status.json"))
 }
 
 fn window_size(size: &str) -> LogicalSize<f64> {

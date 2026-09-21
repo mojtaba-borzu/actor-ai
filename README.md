@@ -94,36 +94,149 @@ Integration reference: [Codex hooks and trust model](https://developers.openai.c
 
 ## Cross-platform shell
 
-`proto/tauri/` is a Rust and Tauri v2 window that reads the same `status.json` the
-macOS app writes and renders the same moods in a webview, so Windows and Linux would
-not need the AppKit view rewritten.
+`proto/tauri/` is a Rust and Tauri v2 window that renders the same moods in a webview,
+so Windows and Linux do not need the AppKit view rewritten. It is a prototype: you run
+it from source, there is no packaged installer, and nothing registers it to start at
+login yet.
+
+It is always **two processes**, and you start both:
+
+| Process | Job |
+|---|---|
+| `app/bridge.py` | Reads Codex session files, writes `status.json` |
+| the shell | Reads `status.json`, draws the buddy |
+
+The macOS app on `main` spawns the bridge itself (`app/Actor.swift:219`). The shell does
+not do that yet, so it needs its own terminal.
+
+The data paths now line up on all three platforms, but the shell has only really been
+run on macOS. **Treat the Windows and Linux steps as untested.**
+
+### macOS
+
+Needs a Rust toolchain and the `python3` that ships with macOS 13+.
+
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+git clone -b tauri-shell https://github.com/mojtaba-borzu/actor-ai
+cd actor-ai
+```
+
+First terminal — the bridge:
+
+```sh
+python3 app/bridge.py
+```
+
+Second terminal — the buddy:
 
 ```sh
 cd proto/tauri
 cargo run
 ```
 
-Requires a Rust toolchain. On Linux, Tauri v2 additionally needs the webkit2gtk and
-libappindicator development packages.
+### Windows
 
-Working: the transparent, always-on-top, click-through-free window; the native context
-menu, rebuilt in Rust on every right-click so its check marks and status line are never
-stale; dragging past a 4 px threshold, which keeps click-for-a-heart alive the way the
-AppKit view does; the appearance and size submenus; mood previews.
+Needs three things before the clone:
 
-**Not working off macOS.** `status_path()` in `src/main.rs` resolves
-`$HOME/Library/Application Support/Actor/status.json`, and `bridge.py` writes to that
-same macOS path, so elsewhere the window opens and never receives a state. Making it
-real needs a per-platform data directory on both sides and a Codex session reader that
-is not macOS-only. Until then this is a prototype that happens to run on macOS.
+- **Rust** from [rustup.rs](https://rustup.rs), which pulls in the MSVC toolchain. If it
+  asks, install the Visual Studio Build Tools workload it names — Tauri cannot link without it.
+- **WebView2 runtime**, already present on Windows 11 and on updated Windows 10.
+- **Python 3.9+** from [python.org](https://www.python.org/downloads/) or the Microsoft Store.
+  The bare `python3` command is a Store stub on Windows, so use `python`.
+
+```powershell
+git clone -b tauri-shell https://github.com/mojtaba-borzu/actor-ai
+cd actor-ai
+```
+
+First PowerShell window — the bridge:
+
+```powershell
+python app\bridge.py
+```
+
+Second PowerShell window — the buddy:
+
+```powershell
+cd proto\tauri
+cargo run
+```
+
+### Linux
+
+Needs the Tauri v2 system libraries as well as Rust and Python. On Debian and Ubuntu:
+
+```sh
+sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev   libssl-dev libayatana-appindicator3-dev librsvg2-dev python3
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+Other distributions are listed under
+[Tauri prerequisites](https://v2.tauri.app/start/prerequisites/). Then:
+
+```sh
+git clone -b tauri-shell https://github.com/mojtaba-borzu/actor-ai
+cd actor-ai
+```
+
+First terminal — the bridge:
+
+```sh
+python3 app/bridge.py
+```
+
+Second terminal — the buddy:
+
+```sh
+cd proto/tauri
+cargo run
+```
+
+A transparent, undecorated, always-on-top window depends on the compositor. Expect it to
+behave on GNOME and KDE with compositing on, and to look wrong on a bare window manager.
+
+### Where things live
+
+| | State written and read | Codex sessions read |
+|---|---|---|
+| macOS | `~/Library/Application Support/Actor/status.json` | `~/.codex/sessions` |
+| Windows | `%APPDATA%\Actor\status.json` | `%USERPROFILE%\.codex\sessions` |
+| Linux | `~/.local/share/Actor/status.json` | `~/.codex/sessions` |
+
+`$XDG_DATA_HOME` overrides the Linux directory and `$CODEX_HOME` overrides the session
+directory everywhere. `data_root()` in `app/bridge.py` and `data_dir()` in
+`proto/tauri/src/main.rs` have to agree — if they ever drift, the window opens and never
+receives a state.
+
+### Did it work
+
+The bridge writes `status.json` within a second of starting, so the file appearing is the
+first thing to check. The caption under the buddy then reads `Codex · Local events` once a
+Codex session is running. If it stays on `Waiting for agent`, the bridge is not writing
+where the shell is looking; if the window never appears at all, read the `cargo run` output
+rather than guessing.
+
+Stop the buddy with **Quit Actor** in its right-click menu, and the bridge with Ctrl+C.
+Nothing is installed anywhere, so there is nothing to uninstall — delete the clone and the
+state directory from the table above.
+
+### Notes for working on it
 
 Tauri v2 grants no permissions by default; `capabilities/default.json` is what lets the
-window listen for events, drag and resize itself. Transparency relies on
-`macOSPrivateApi`, which rules out the Mac App Store.
+window listen for events, drag and resize itself. Dragging starts past a 4 px threshold
+rather than through `data-tauri-drag-region`, which keeps click-for-a-heart alive the way
+the AppKit view does. Transparency relies on `macOSPrivateApi`, which rules out the Mac
+App Store.
 
 `tools/build-renderer.py` generates `ui/index.html` by parsing the moods out of
-`app/Actor.swift`, so the renderer cannot drift from the shipped app. Edit the poses
-there and rerun it.
+`app/Actor.swift`, so the renderer cannot drift from the shipped app. Edit the poses there
+and rerun it.
+
+Still missing before this could be called an install: the shell spawning and reaping the
+bridge the way `Actor.swift` does, a `cargo tauri build` bundle per platform, and a
+start-at-login entry — a LaunchAgent on macOS, a `Run` registry key on Windows, an
+autostart desktop entry on Linux.
 
 ## License
 

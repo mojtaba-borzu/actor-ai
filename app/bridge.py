@@ -3,10 +3,19 @@ import datetime as dt
 import json
 import os
 from pathlib import Path
+import sys
 import tempfile
 import time
 
-ROOT = Path.home() / 'Library/Application Support/Actor'
+def data_root():
+    """One directory per platform, shared with the shell. Keep in sync with data_dir() in main.rs."""
+    if sys.platform == 'darwin':
+        return Path.home() / 'Library/Application Support/Actor'
+    if os.name == 'nt':
+        return Path(os.environ.get('APPDATA') or Path.home() / 'AppData/Roaming') / 'Actor'
+    return Path(os.environ.get('XDG_DATA_HOME') or Path.home() / '.local/share') / 'Actor'
+
+ROOT = data_root()
 STATES = {'idle', 'appear', 'thinking', 'working', 'tool', 'waiting', 'error', 'success', 'sleep', 'goodbye'}
 
 def tool_state(name):
