@@ -211,11 +211,22 @@ receives a state.
 
 ### Did it work
 
-The bridge writes `status.json` within a second of starting, so the file appearing is the
-first thing to check. The caption under the buddy then reads `Codex · Local events` once a
-Codex session is running. If it stays on `Waiting for agent`, the bridge is not writing
-where the shell is looking; if the window never appears at all, read the `cargo run` output
-rather than guessing.
+The bridge prints nothing at all. A cursor sitting on a blank line is what success looks
+like — it is a background loop, not a reporting tool. What it does instead is write
+`status.json` within a second of starting, so that file appearing is the first thing to
+check.
+
+`{}` in that file is normal. It means no Codex session ran today or yesterday, which are
+the only two days `poll()` scans, deliberately, rather than every conversation you have
+ever had. Start a Codex session and it fills within a second.
+
+The bridge on its own draws nothing: nothing appears on screen until the second terminal is
+running too. Once both are up, the caption under the buddy reads `Codex · Local events`. If
+it stays on `Waiting for agent`, the bridge is not writing where the shell is looking; if
+the window never appears at all, read the `cargo run` output rather than guessing.
+
+To see the buddy without any Codex session at all, right-click it and pick **Try a mood**.
+That path never touches the bridge.
 
 Stop the buddy with **Quit Actor** in its right-click menu, and the bridge with Ctrl+C.
 Nothing is installed anywhere, so there is nothing to uninstall — delete the clone and the
