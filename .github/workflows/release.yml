@@ -36,6 +36,19 @@ jobs:
       - name: Zip the bundle
         run: ditto -c -k --keepParent .build/Actor.app Actor-macOS.zip
 
+      # A signature that did not survive the zip round trip is the usual reason a
+      # downloaded .app refuses to open, so verify the artifact rather than the
+      # build output it came from.
+      - name: Verify the zipped app
+        run: |
+          mkdir roundtrip
+          ditto -x -k Actor-macOS.zip roundtrip
+          codesign --verify --deep --strict --verbose=2 roundtrip/Actor.app
+          codesign -dv roundtrip/Actor.app 2>&1 | grep -q 'Signature=adhoc'
+          plutil -lint roundtrip/Actor.app/Contents/Info.plist
+          python3 -m py_compile roundtrip/Actor.app/Contents/Resources/bridge.py
+          test -x roundtrip/Actor.app/Contents/MacOS/Actor
+
       - uses: actions/upload-artifact@v4
         with:
           name: Actor-macOS
