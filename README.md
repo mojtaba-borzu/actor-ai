@@ -4,6 +4,11 @@ A tiny animated emoji companion for **macOS**, floating beside Codex.
 Uses native Apple emoji, AppKit animation, and local activity signals. No server,
 API key, screenshot access, or network connection required.
 
+> **This branch carries the experimental cross-platform shell.** The shipping app is
+> the AppKit one on [`main`](https://github.com/mojtaba-borzu/actor-ai/tree/main).
+> Everything below describes that app; [Cross-platform shell](#cross-platform-shell)
+> covers what this branch adds and what it still cannot do.
+
 ![Actor reacting to a live Codex session](assets/demo.gif)
 
 ## Install
@@ -85,13 +90,40 @@ what ships. `make-gif.sh` takes a provider label, an output path, `emoji` or
 
 Uninstall removes only Actor's app and launch agent. It leaves small status files.
 
-`proto/tauri/` is an experimental cross-platform shell: a Rust window that reads the
-same `status.json` and renders the same moods in a webview, so Windows and Linux do
-not need the AppKit view rewritten. Build it with `cargo build` inside that folder.
-`tools/build-renderer.py` generates its UI by parsing the moods out of `app/Actor.swift`,
-so the two cannot drift.
-
 Integration reference: [Codex hooks and trust model](https://developers.openai.com/codex/hooks).
+
+## Cross-platform shell
+
+`proto/tauri/` is a Rust and Tauri v2 window that reads the same `status.json` the
+macOS app writes and renders the same moods in a webview, so Windows and Linux would
+not need the AppKit view rewritten.
+
+```sh
+cd proto/tauri
+cargo run
+```
+
+Requires a Rust toolchain. On Linux, Tauri v2 additionally needs the webkit2gtk and
+libappindicator development packages.
+
+Working: the transparent, always-on-top, click-through-free window; the native context
+menu, rebuilt in Rust on every right-click so its check marks and status line are never
+stale; dragging past a 4 px threshold, which keeps click-for-a-heart alive the way the
+AppKit view does; the appearance and size submenus; mood previews.
+
+**Not working off macOS.** `status_path()` in `src/main.rs` resolves
+`$HOME/Library/Application Support/Actor/status.json`, and `bridge.py` writes to that
+same macOS path, so elsewhere the window opens and never receives a state. Making it
+real needs a per-platform data directory on both sides and a Codex session reader that
+is not macOS-only. Until then this is a prototype that happens to run on macOS.
+
+Tauri v2 grants no permissions by default; `capabilities/default.json` is what lets the
+window listen for events, drag and resize itself. Transparency relies on
+`macOSPrivateApi`, which rules out the Mac App Store.
+
+`tools/build-renderer.py` generates `ui/index.html` by parsing the moods out of
+`app/Actor.swift`, so the renderer cannot drift from the shipped app. Edit the poses
+there and rerun it.
 
 ## License
 
